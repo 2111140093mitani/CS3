@@ -1,23 +1,31 @@
 class TopController < ApplicationController
-  def main
-    if session[:login_uid] != nil
-      render "main"
-    else
-      render "login"
+    def main
+        if session[:login_uid] != nil
+            render "main"
+        else
+            render "login"
+        end
     end
-  end
-
-  def login
-    if User.find_by(uid: params[:uid]) && User.find_by(pass: params[:pass])
-      session[:login_uid] = params[:uid]
-      redirect_to top_main_path
-    else
-      render plain: "error"
+    
+    def login
+        if User.find_by(uid: params[:uid])
+            session[:login_uid] = params[:uid]
+            redirect_to top_main_path
+            
+        else
+            render "error"
+        end
     end
-  end
-  
-  def logout
-    session.delete(:login_uid)
-    redirect_to top_main_path
-  end
+    
+    def logout
+        session.delete(:login_uid)
+        redirect_to top_main_path
+    end
+    
+    def create
+        hashed_password = BCrypt::Password.create(params[:pass])
+        user = User.new(uid: params[:uid], pass: hashed_password)
+        user.save
+        redirect_to top_main_path
+    end
 end
